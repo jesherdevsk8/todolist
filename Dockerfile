@@ -11,3 +11,5 @@ RUN yarn install --production
 ENTRYPOINT ["node"]
 
 CMD ["src/index.js"]
+
+EXPOSE 3000
