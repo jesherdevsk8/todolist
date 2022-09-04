@@ -12,8 +12,8 @@ services:
     env_file:
       - ./config/nodedb.env
 
-  mariadb:
-    image: mariadb:latest
+  mysql:
+    image: mysql:5.7
     volumes:
       - mysql-todo-db:/var/lib/mysql
     env_file: 
