@@ -1,0 +1,17 @@
+image: docker:stable
+
+services:
+  - docker:dind
+
+before_script:
+  - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
+
+stages:
+  - build
+
+build-image:
+  stage: build
+  script:
+    - docker build --tag todolist .
+    - docker tag todolist jesherpinkman/todolist:latest
+    - docker push jesherpinkman/todolist:latest
