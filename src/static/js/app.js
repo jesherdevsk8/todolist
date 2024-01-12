@@ -78,7 +78,7 @@ function AddItemForm({ onNewItem }) {
         setSubmitting(true);
         fetch('/items', {
             method: 'POST',
-            body: JSON.stringify({ name: newItem }),
+            body: JSON.stringify({ name: newItem, position: 1 }),
             headers: { 'Content-Type': 'application/json' },
         })
             .then(r => r.json())
@@ -130,6 +130,40 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
             .then(onItemUpdate);
     };
 
+    const handleDragStart = (e) => {
+        e.dataTransfer.setData('text/plain', JSON.stringify(item));
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+    };
+
+    const handleDrop = async (e) => {
+        e.preventDefault();
+
+        const draggedItem = JSON.parse(e.dataTransfer.getData('text/plain'));
+
+        if (draggedItem.id !== item.id) {
+            console.log(`Dragged Item: ${draggedItem.name}, Position: ${draggedItem.position}, Item: ${item.name}, Item Position: ${item.position} `);
+
+            await updatePositionOnServer(draggedItem.id, draggedItem.position, item.id, item.position);
+        }
+    };
+
+    const updatePositionOnServer = async (draggedItemId, draggedItemNewPosition, itemOverId, itemOverNewPosition) => {
+        fetch(`/items/${draggedItemId}/updatePosition`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+                itemOverId: itemOverId,
+                itemOverNewPosition: itemOverNewPosition,
+                draggedItemNewPosition: draggedItemNewPosition,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+        })
+            .then(r => r.json())
+            .then(onItemUpdate);
+    };
+
     const removeItem = () => {
         fetch(`/items/${item.id}`, { method: 'DELETE' }).then(() =>
             onItemRemoval(item),
@@ -137,7 +171,14 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
     };
 
     return (
-        <Container fluid className={`item ${item.completed && 'completed'}`}>
+        <Container 
+            fluid
+            className={`item ${item.completed && 'completed'}`}
+            draggable
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop} >
+
             <Row>
                 <Col xs={1} className="text-center">
                     <Button
