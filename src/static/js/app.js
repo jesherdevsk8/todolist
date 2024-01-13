@@ -143,9 +143,8 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
 
         const draggedItem = JSON.parse(e.dataTransfer.getData('text/plain'));
 
+        // TODO: rever esse bloco
         if (draggedItem.id !== item.id) {
-            console.log(`Dragged Item: ${draggedItem.name}, Position: ${draggedItem.position}, Item: ${item.name}, Item Position: ${item.position} `);
-
             await updatePositionOnServer(draggedItem.id, draggedItem.position, item.id, item.position);
         }
     };

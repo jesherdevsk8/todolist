@@ -76,7 +76,7 @@ async function getItems() {
 
 async function getItem(id) {
     return new Promise((acc, rej) => {
-        pool.query('SELECT * FROM todo_items WHERE id=? ORDER BY position', [id], (err, rows) => {
+        pool.query('SELECT * FROM todo_items WHERE id=?', [id], (err, rows) => {
             if (err) return rej(err);
             acc(
                 rows.map(item =>
@@ -138,8 +138,6 @@ async function updateItem(id, item) {
 }
 
 async function updateItemPosition(id, item) {
-    console.log(id, item)
-
     return new Promise((acc, rej) => {
         pool.query(
             'UPDATE todo_items SET position=? WHERE id=?',

@@ -2,6 +2,7 @@ const db = require('../persistence');
 
 module.exports = async (req, res) => {
     console.log(req.body);
+    // TODO: rever esse update
     await db.updateItemPosition(req.params.id, {
         position: req.body.itemOverNewPosition,
     });
