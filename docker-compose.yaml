@@ -14,6 +14,8 @@ services:
 
   mariadb:
     image: mariadb:latest
+    ports:
+      - 3306:3306
     volumes:
       - mysql-todo-db:/var/lib/mysql
     env_file: 
