@@ -143,24 +143,24 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
 
         const draggedItem = JSON.parse(e.dataTransfer.getData('text/plain'));
 
-        // TODO: rever esse bloco
-        if (draggedItem.id !== item.id) {
-            await updatePositionOnServer(draggedItem.id, draggedItem.position, item.id, item.position);
-        }
+        const droppedOnItemId = e.currentTarget.id;
+        const droppedOnItemPosition = e.currentTarget.getAttribute('data-position');
+        
+        await updatePositionOnServer(draggedItem.id, draggedItem.position, droppedOnItemId, droppedOnItemPosition);
     };
 
-    const updatePositionOnServer = async (draggedItemId, draggedItemNewPosition, itemOverId, itemOverNewPosition) => {
+    const updatePositionOnServer = async (draggedItemId, draggedItemPosition, droppedOnItemId, droppedOnItemPosition) => {
         fetch(`/items/${draggedItemId}/updatePosition`, {
             method: 'PATCH',
             body: JSON.stringify({
-                itemOverId: itemOverId,
-                itemOverNewPosition: itemOverNewPosition,
-                draggedItemNewPosition: draggedItemNewPosition,
+                draggedItemPosition: draggedItemPosition,
+                droppedOnItemId: droppedOnItemId,
+                droppedOnItemPosition: parseInt(droppedOnItemPosition),
             }),
             headers: { 'Content-Type': 'application/json' },
         })
             .then(r => r.json())
-            .then(onItemUpdate);
+            .then(window.location.reload())
     };
 
     const removeItem = () => {
@@ -172,8 +172,10 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
     return (
         <Container 
             fluid
-            className={`item ${item.completed && 'completed'}`}
             draggable
+            id={item.id}
+            data-position={item.position}
+            className={`item ${item.completed && 'completed'}`}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDrop={handleDrop} >

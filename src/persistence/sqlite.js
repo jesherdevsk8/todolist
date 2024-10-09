@@ -116,7 +116,6 @@ async function updateItem(id, item) {
 }
 
 async function updateItemPosition(id, item) {
-    console.log(id, item)
     return new Promise((acc, rej) => {
         db.run(
             'UPDATE todo_items SET position=? WHERE id=?',
