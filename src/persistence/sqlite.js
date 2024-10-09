@@ -2,7 +2,7 @@ const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const location = process.env.SQLITE_DB_LOCATION || '/etc/todos/todo.db';
 
-let db, dbAll, dbRun;
+let db;
 
 function init() {
     const dirName = require('path').dirname(location);
@@ -18,7 +18,7 @@ function init() {
                 console.log(`Using sqlite database at ${location}`);
 
             db.run(
-                'CREATE TABLE IF NOT EXISTS todo_items (id varchar(36), name varchar(255), completed boolean)',
+                'CREATE TABLE IF NOT EXISTS todo_items (id varchar(36), name varchar(255), position integer DEFAULT 0, completed boolean)',
                 (err, result) => {
                     if (err) return rej(err);
                     acc();
@@ -39,7 +39,7 @@ async function teardown() {
 
 async function getItems() {
     return new Promise((acc, rej) => {
-        db.all('SELECT * FROM todo_items', (err, rows) => {
+        db.all('SELECT * FROM todo_items ORDER BY position', (err, rows) => {
             if (err) return rej(err);
             acc(
                 rows.map(item =>
@@ -68,13 +68,35 @@ async function getItem(id) {
 }
 
 async function storeItem(item) {
+    try {
+        const nextPosition = await getNextAvailablePosition();
+
+        await new Promise((acc, rej) => {
+            db.run(
+                'INSERT INTO todo_items (id, name, position, completed) VALUES (?, ?, ?, ?)',
+                [item.id, item.name, nextPosition, item.completed ? 1 : 0],
+                err => {
+                    if (err) return rej(err);
+                    acc();
+                }
+            );
+        });
+
+        return { ...item, position: nextPosition };
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function getNextAvailablePosition() {
     return new Promise((acc, rej) => {
-        db.run(
-            'INSERT INTO todo_items (id, name, completed) VALUES (?, ?, ?)',
-            [item.id, item.name, item.completed ? 1 : 0],
-            err => {
+        db.get(
+            'SELECT MAX(position) + 1 AS nextPosition FROM todo_items',
+            (err, results) => {
                 if (err) return rej(err);
-                acc();
+
+                const nextPosition = results.nextPosition || 1;
+                acc(nextPosition);
             },
         );
     });
@@ -91,7 +113,20 @@ async function updateItem(id, item) {
             },
         );
     });
-} 
+}
+
+async function updateItemPosition(id, item) {
+    return new Promise((acc, rej) => {
+        db.run(
+            'UPDATE todo_items SET position=? WHERE id=?',
+            [item.position, id],
+            err => {
+                if (err) return rej(err);
+                acc();
+            },
+        );
+    });
+}
 
 async function removeItem(id) {
     return new Promise((acc, rej) => {
@@ -109,5 +144,6 @@ module.exports = {
     getItem,
     storeItem,
     updateItem,
+    updateItemPosition,
     removeItem,
 };

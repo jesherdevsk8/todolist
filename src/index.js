@@ -5,6 +5,7 @@ const getItems = require('./routes/getItems');
 const addItem = require('./routes/addItem');
 const updateItem = require('./routes/updateItem');
 const deleteItem = require('./routes/deleteItem');
+const updatePosition = require('./routes/updatePosition');
 
 app.use(express.json());
 app.use(express.static(__dirname + '/static'));
@@ -12,6 +13,7 @@ app.use(express.static(__dirname + '/static'));
 app.get('/items', getItems);
 app.post('/items', addItem);
 app.put('/items/:id', updateItem);
+app.patch('/items/:id/updatePosition', updatePosition);
 app.delete('/items/:id', deleteItem);
 
 db.init().then(() => {
