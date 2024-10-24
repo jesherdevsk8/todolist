@@ -6,4 +6,4 @@
 
 > docker volume create todo-db
 
-> docker run -d -p 3000:3000 -v todo-db:/etc/todos/ --name todolist --rm todolist
+> docker run -d -p 3000:3000 -v todo-db:/etc/todos/ -v $(pwd):/app --name todolist node:18-alpine sh -c "cd /app && yarn install && yarn run dev"

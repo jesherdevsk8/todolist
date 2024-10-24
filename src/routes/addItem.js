@@ -5,6 +5,7 @@ module.exports = async (req, res) => {
     const item = {
         id: uuid(),
         name: req.body.name,
+        position: req.body.position,
         completed: false,
     };
 
